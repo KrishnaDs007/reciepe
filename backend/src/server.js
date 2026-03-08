@@ -1,11 +1,16 @@
 import express from "express";
 import { eq, and } from "drizzle-orm";
 import { ENV } from "./config/env.js";
-import { db } from "./db/db.js";
+import { db } from "./config/db.js";
 import { favoritesTable } from "./db/schema.js";
+import cronJob from "./config/cron.js";
 
 const app = express();
 const PORT = ENV.PORT;
+
+if (ENV.NODE_ENV === "production") {
+  cronJob.start();
+}
 
 app.use(express.json());
 
@@ -66,12 +71,10 @@ app.delete("/api/favorites/:userId/:recipeId", async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res
-      .status(500)
-      .json({
-        status: false,
-        message: "Failed to delete recipe from favorites",
-      });
+    res.status(500).json({
+      status: false,
+      message: "Failed to delete recipe from favorites",
+    });
   }
 });
 
